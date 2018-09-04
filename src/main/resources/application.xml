@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+    <bean id="job2"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <bean class="com.bo.job.SimpleMailSend"/>
+        </property>
+        <property name="targetMethod" value="main"/>
+        <property name="concurrent" value="false"/><!-- 作业不并发调度 -->
+    </bean>
+<!--    <bean id="simpleTrigger"
+          class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="job2"/>
+        <property name="startDelay" value="0"/>&lt;!&ndash;调度工厂实例化后，经过0秒开始执行调度&ndash;&gt;
+        <property name="repeatInterval" value="60000"/>&lt;!&ndash;每60秒调度一次&ndash;&gt;
+    </bean>-->
+    <!--设置石英触发器-->
+    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="job2"></property>
+        <!--配置石英表达式-->
+        <property name="cronExpression" value="0 0/1 * * * ?"></property>
+    </bean>
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="cronTrigger"/>
+            </list>
+        </property>
+    </bean>
+    <!-- Spring提供的发送电子邮件的高级抽象类 -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <!-- 邮件smtp服务器地址 -->
+        <property name="host" value="smtp.qq.com"/>
+        <!-- 邮箱用户名 -->
+        <property name="username" value="1084877426@qq.com"/>
+        <!-- 邮箱密码(授权smtp的密码) -->
+        <property name="password" value="xpdtodtfqazugghb"/>
+        <!-- 编码格式 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 邮箱服务器属性设置 -->
+        <property name="javaMailProperties">
+            <props>
+                <!-- 邮箱服务器是否支持验证 -->
+                <prop key="mail.smtp.auth">true</prop>
+                <!-- 邮箱服务器连接超时时间  毫秒-->
+                <prop key="mail.smtp.timeout">300000</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
